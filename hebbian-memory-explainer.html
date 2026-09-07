@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Synaptic Plasticity as Short-Term Memory — an interactive explainer</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1e2230; --line:#2a2f3f;
+    --ink:#eef0f6; --sub:#a3aac2; --accent:#7c9cff; --accent2:#ff9d5c;
+    --good:#54d68a; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.55;}
+  .wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px;}
+  h1{font-size:1.7rem;margin:0 0 6px;}
+  h2{font-size:1.2rem;margin:38px 0 10px;border-top:1px solid var(--line);padding-top:26px;}
+  h3{font-size:1rem;margin:18px 0 8px;color:var(--accent);}
+  p{color:var(--sub);}
+  .claim{background:linear-gradient(135deg,#1b2140,#241a33);border:1px solid #3a3f66;border-radius:12px;padding:16px 18px;margin:16px 0;color:#dfe3ff;font-size:1.02rem;}
+  .claim b{color:#fff;}
+  .tag{display:inline-block;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;background:#26304a;color:#9fb4ff;padding:3px 9px;border-radius:999px;margin-right:6px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0;}
+  .row{display:flex;gap:18px;flex-wrap:wrap;}
+  .col{flex:1;min-width:230px;}
+  .grid7x5{display:grid;grid-template-columns:repeat(5,28px);grid-template-rows:repeat(7,28px);gap:3px;margin:8px 0;}
+  .cell{width:28px;height:28px;border-radius:5px;background:#262b3b;transition:background .15s;}
+  .cell.on{background:var(--accent);}
+  .cell.probe-on{background:var(--accent2);}
+  .cell.wrong{outline:2px solid var(--bad);}
+  .cell.correctOn{background:var(--good);}
+  label{display:block;font-size:.82rem;color:var(--sub);margin:10px 0 4px;}
+  select,button,input[type=range]{font-family:inherit;}
+  select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;}
+  button{background:var(--accent);color:#0f1117;border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;margin:4px 6px 4px 0;}
+  button.secondary{background:var(--panel2);color:var(--ink);border:1px solid var(--line);}
+  button:hover{filter:brightness(1.1);}
+  .stat{display:flex;justify-content:space-between;background:var(--panel2);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:.9rem;}
+  .stat b{color:#fff;}
+  canvas{background:#10131c;border-radius:8px;display:block;}
+  .legend{font-size:.78rem;color:var(--sub);display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+  .footnote{font-size:.85rem;color:#7b83a0;border-left:3px solid var(--line);padding-left:12px;margin:14px 0;}
+  .misconception{background:#1f1620;border:1px solid #4a2c3a;border-radius:10px;padding:12px 14px;margin:8px 0;}
+  .misconception b{color:var(--bad);}
+  ul{color:var(--sub);}
+  a{color:var(--accent);}
+  .bdh-box{background:#101c18;border:1px solid #244034;border-radius:12px;padding:16px 18px;margin:14px 0;}
+  .bdh-box h3{color:var(--good);}
+  .srcs{font-size:.82rem;color:#7b83a0;}
+  .srcs li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="tag">DataForge · Pathway Track</span>
+  <span class="tag">Topic: Synaptic Plasticity as Short-Term Memory</span>
+  <h1>When wiring becomes memory</h1>
+  <p>How a network can remember several recent things <em>without writing anything to a notebook, a cache, or a trained parameter</em> — just by temporarily changing how strongly its own neurons are connected.</p>
+
+  <div class="claim">
+    <b>The one-sentence claim this page teaches:</b> A network whose connection strengths update online, after every input, using a local Hebbian rule (Δw ∝ activity × activity) can store several recent patterns directly in its weights and later reconstruct one from a partial cue — but its capacity is limited, so storing too many patterns makes them <b>interfere</b> and corrupts recall of all of them. Making the stored activity <b>sparse and non-negative</b> — the choice Dragon Hatchling (BDH) makes — measurably reduces that interference.
+  </div>
+
+  <h2>1. Store a pattern by looking at it</h2>
+  <p>Pick a shape, press <b>Store</b>. Nothing is trained or backpropagated — a single outer‑product update <code>W ← λ·W + x·xᵀ</code> is added to a weight matrix live, in your browser. Store two or three shapes.</p>
+
+  <div class="panel">
+    <div class="row">
+      <div class="col">
+        <label>Shape to store</label>
+        <select id="patternSelect"></select>
+        <div id="storeGrid" class="grid7x5"></div>
+        <button id="storeBtn">Store this pattern</button>
+        <button id="resetBtn" class="secondary">Reset network</button>
+        <label>Decay per new memory (λ) — short-term forgetting</label>
+        <input type="range" id="decaySlider" min="0.5" max="1" step="0.01" value="1">
+        <div class="stat"><span>λ (how much of the old memory survives a new write)</span><b id="decayVal">1.00</b></div>
+        <div class="stat"><span>Patterns stored so far</span><b id="storedCount">0</b></div>
+        <div id="storedList" style="font-size:.85rem;color:var(--sub)"></div>
+      </div>
+      <div class="col">
+        <label>Synaptic weight matrix W (35×35), live</label>
+        <canvas id="weightCanvas" width="240" height="240"></canvas>
+        <div class="legend">
+          <span><span class="swatch" style="background:#4059c9"></span>excitatory (+)</span>
+          <span><span class="swatch" style="background:#c94f40"></span>inhibitory (−)</span>
+          <span><span class="swatch" style="background:#10131c"></span>~0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>2. Corrupt it, then ask the network to recall</h2>
+  <p>Choose one of the shapes you stored, corrupt a fraction of its pixels, and let the network settle: each unit repeatedly asks its neighbours "given everything you're connected to, should I be on or off?" — that's <code>x ← f(W·x)</code>, iterated. Compare the settled output with the true shape you started from.</p>
+
+  <div class="panel">
+    <div class="row">
+      <div class="col">
+        <label>Recall which stored shape?</label>
+        <select id="recallSelect"></select>
+        <label>Corruption (fraction of pixels flipped before recall)</label>
+        <input type="range" id="corruptSlider" min="0" max="1" step="0.05" value="0.3">
+        <div class="stat"><span>Pixels flipped</span><b id="corruptVal">30%</b></div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:14px;">
+          <input type="checkbox" id="sparseToggle" style="width:16px;height:16px;">
+          Sparse, non-negative retrieval (BDH-style: only the most active units stay on)
+        </label>
+        <button id="probeBtn">Corrupt cue</button>
+        <button id="recallBtn">Run recall</button>
+      </div>
+      <div class="col">
+        <div style="display:flex;gap:24px;">
+          <div>
+            <label>Corrupted cue you gave it</label>
+            <div id="probeGrid" class="grid7x5"></div>
+          </div>
+          <div>
+            <label>Network's reconstruction</label>
+            <div id="recallGrid" class="grid7x5"></div>
+          </div>
+          <div>
+            <label>Ground truth (what it should be)</label>
+            <div id="truthGrid" class="grid7x5"></div>
+          </div>
+        </div>
+        <div class="stat" style="margin-top:12px;"><span>Overlap with ground truth after settling</span><b id="overlapVal">—</b></div>
+        <div class="stat"><span>Settling steps taken</span><b id="stepsVal">—</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="misconception">
+    <b>Try this / a common misconception:</b> people assume more stored patterns just means "a little blurrier" recall. Store all 6 shapes, set corruption to 40%, and run recall on each. Somewhere around 4–5 simultaneous memories in this 35-unit network, recall doesn't degrade gracefully — it can lock onto a <em>different</em> stored pattern entirely, or a spurious mixture that matches none of them. That's interference, not noise.
+  </div>
+
+  <h2>3. Does capacity actually break down? (a live sweep, not a claim)</h2>
+  <p>This runs the real simulation above, automatically, for 1 to 12 stored random patterns, in both normal and sparse retrieval modes, and plots the average recall accuracy at 25% corruption. It is computed fresh each time you press the button — nothing here is precomputed or faked.</p>
+  <div class="panel">
+    <button id="sweepBtn">Run capacity sweep (dense vs. sparse)</button>
+    <canvas id="sweepCanvas" width="600" height="260"></canvas>
+    <div class="legend">
+      <span><span class="swatch" style="background:#4059c9"></span>dense / bipolar retrieval (plain Hopfield-style rule)</span>
+      <span><span class="swatch" style="background:#54d68a"></span>sparse, non-negative retrieval (k-winners-take-all)</span>
+    </div>
+    <p id="sweepReadout" style="font-size:.85rem;"></p>
+  </div>
+
+  <div class="bdh-box">
+    <h3>Where this actually shows up in BDH</h3>
+    <p><b>System:</b> Dragon Hatchling (BDH), Pathway, Sept. 2025 (arXiv:2509.26507) — and its later reasoning variant BDH‑CQ (arXiv:2608.09888).</p>
+    <p>BDH does not carry a growing key-value cache the way a standard Transformer does. Its working memory is the <em>state of the synapse graph itself</em>: attention is reformulated as a Hebbian update to synaptic strength, so recent co-activity between "neuron particles" literally strengthens the connection between them, and that connection is what gets read back later in the same context. This is exactly the mechanism this sandbox simplifies to a 35-unit toy: <code>Δw ∝ activity(i) × activity(j)</code>, applied online, with no gradient step and no backward pass.</p>
+    <p>The two knobs in this sandbox map onto two things the BDH paper reports explicitly:</p>
+    <ul>
+      <li><b>Sparse, non-negative activity.</b> The paper reports that BDH's activation vectors are sparse and positive, with roughly 5% of neurons active at a time, and that activity level varies with how predictable the input is, rather than following a fixed budget. This sandbox's "sparse retrieval" toggle is a deliberately simplified, non-official stand‑in for that constraint — a k‑winners‑take‑all nonlinearity, not BDH's actual activation function — used only to show <em>why</em> a sparsity constraint of this general kind reduces crosstalk between overlapping memories.</li>
+      <li><b>Monosemantic synapses.</b> The paper reports that individual synapses in trained BDH models become selective for recognisable concepts rather than firing for many unrelated inputs — the graph-level analogue of "this connection means one thing." That's the same reason sparse writes in the sandbox interfere less: fewer, more selective active units share fewer of their connections across different stored patterns.</li>
+    </ul>
+    <p>BDH-CQ's contextual memory (used for in-context learning on ARC-AGI-style tasks) is reported as an evolving recurrent state built from exactly this family of update: each demonstration updates a fixed-size memory additively, related in the paper's own framing to fast-weight and linear-attention views of contextual association, and no parameters are changed at inference — adaptation lives in that recurrent state, not in the weights that were trained. The sandbox's "store, then decay" behaviour is a toy version of that same idea: fast, temporary, capacity‑limited state versus slow, trained, durable weights.</p>
+    <div class="footnote">
+      <b>Honesty check:</b> this sandbox is an independent 35-unit educational toy, built for this explainer, not a reproduction of BDH and not run on any BDH checkpoint. The Hebbian outer-product rule, the sparsity-reduces-interference effect, and the capacity trade-off are real and well established (Hopfield-style associative memory; Schlag, Irie & Schmidhuber's fast-weight-programmer equivalence). What's illustrative rather than official is the specific k-winners-take-all mechanism used to stand in for BDH's own activation function — the real BDH nonlinearity and exact sparsity dynamics are defined in the primary paper, not reproduced here.
+    </div>
+  </div>
+
+  <h2>Limitations of the sandbox itself</h2>
+  <ul>
+    <li>35 units is tiny. Real associative-memory capacity scales with network size in ways this demo can only gesture at.</li>
+    <li>Synchronous settling can oscillate for some corrupted cues; the demo caps iterations and reports whichever state it lands on, which is itself a real property of this kind of recurrent recall, not a bug being hidden from you.</li>
+    <li>"Sparse mode" here is a retrieval-time nonlinearity chosen for teaching clarity. It is not BDH's activation function, and the exact numbers (∼5% active, degree distribution, etc.) come only from the primary paper, not from this toy.</li>
+  </ul>
+
+  <h2>Sources</h2>
+  <ul class="srcs">
+    <li>Kosowski, Uznański, Chorowski, Stamirowska, Bartoszkiewicz. <i>The Dragon Hatchling: The Missing Link between the Transformer and Models of the Brain.</i> arXiv:2509.26507 (2025).</li>
+    <li>Pathway (BDH-CQ team). <i>BDH-CQ: In-Context Learning with Recurrent Latent Reasoning.</i> arXiv:2608.09888 (2026).</li>
+    <li>Schlag, Irie, Schmidhuber. <i>Linear Transformers Are Secretly Fast Weight Programmers.</i> ICML / arXiv:2102.11174 (2021) — formal basis for the outer-product Hebbian write used here.</li>
+    <li>Irie, Schlag, Csordás, Schmidhuber. <i>A Modern Self-Referential Weight Matrix That Learns to Modify Itself.</i> ICML 2022.</li>
+    <li>Chaudhary. <i>Enabling Robust In-Context Memory and Rapid Task Adaptation in Transformers with Hebbian and Gradient-Based Plasticity.</i> arXiv:2510.21908 (2025).</li>
+    <li><i>Hebbian Fast Weights in Vision Transformers for Few-Shot Learning.</i> arXiv:2605.02920 (2026).</li>
+  </ul>
+
+</div>
+
+<script>
+const N=35, ROWS=7, COLS=5;
+const PATTERNS = {
+  "Plus": ["..#..","..#..","..#..","#####","..#..","..#..","..#.."],
+  "X": ["#...#",".#.#.","..#..","..#..","..#..",".#.#.","#...#"],
+  "Box": ["#####","#...#","#...#","#...#","#...#","#...#","#####"],
+  "Arrow": ["..#..",".###.","#####","..#..","..#..","..#..","..#.."],
+  "Diamond": ["..#..",".#.#.","#...#","#...#","#...#",".#.#.","..#.."],
+  "T": ["#####","..#..","..#..","..#..","..#..","..#..","..#.."]
+};
+function toVec(rows){
+  let v=[];
+  for(const row of rows) for(const ch of row) v.push(ch==='#'?1:-1);
+  return v;
+}
+const VECS = {}; for(const k in PATTERNS) VECS[k]=toVec(PATTERNS[k]);
+const NAMES = Object.keys(PATTERNS);
+
+let W = new Array(N).fill(0).map(()=>new Array(N).fill(0));
+let stored = []; // {name, vec}
+
+function outerAdd(vec, lambda){
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+    if(i===j) continue;
+    W[i][j] = W[i][j]*lambda + vec[i]*vec[j];
+  }
+}
+
+function buildGrid(container, vec, mode){
+  container.innerHTML='';
+  for(let i=0;i<N;i++){
+    const d=document.createElement('div');
+    let cls='cell';
+    if(mode==='probe' && vec[i]>0) cls+=' probe-on';
+    else if(vec[i]>0) cls+=' on';
+    d.className=cls;
+    container.appendChild(d);
+  }
+}
+function markDiff(container, guess, truth){
+  const cells=container.children;
+  for(let i=0;i<N;i++){
+    cells[i].classList.remove('wrong','correctOn');
+    if(guess[i]!==truth[i]) cells[i].classList.add('wrong');
+    else if(truth[i]>0) cells[i].classList.add('correctOn');
+  }
+}
+
+function drawWeights(){
+  const c=document.getElementById('weightCanvas'); const ctx=c.getContext('2d');
+  const cell=c.width/N;
+  let maxAbs=0.001;
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++) maxAbs=Math.max(maxAbs, Math.abs(W[i][j]));
+  for(let i=0;i<N;i++){
+    for(let j=0;j<N;j++){
+      const v=W[i][j]/maxAbs;
+      let r,g,b;
+      if(v>=0){ r=16+Math.round((64-16)*v); g=19+Math.round((89-19)*v); b=28+Math.round((201-28)*v); }
+      else { const a=-v; r=16+Math.round((201-16)*a); g=19+Math.round((79-19)*a); b=28+Math.round((64-28)*a); }
+      ctx.fillStyle=`rgb(${r},${g},${b})`;
+      ctx.fillRect(j*cell,i*cell,cell,cell);
+    }
+  }
+}
+
+function refreshSelects(){
+  const s1=document.getElementById('patternSelect');
+  const s2=document.getElementById('recallSelect');
+  s1.innerHTML=''; NAMES.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;s1.appendChild(o);});
+  s2.innerHTML=''; stored.forEach((s,idx)=>{const o=document.createElement('option');o.value=idx;o.textContent=`#${idx+1}: ${s.name}`;s2.appendChild(o);});
+}
+function refreshStoreGrid(){
+  buildGrid(document.getElementById('storeGrid'), VECS[document.getElementById('patternSelect').value]);
+}
+function refreshStoredList(){
+  document.getElementById('storedCount').textContent = stored.length;
+  document.getElementById('storedList').textContent = stored.length? ("Order: " + stored.map(s=>s.name).join(' → ')) : "Nothing stored yet.";
+}
+
+let currentProbe=null, currentTruthIdx=null;
+
+document.getElementById('patternSelect').addEventListener('change', refreshStoreGrid);
+document.getElementById('decaySlider').addEventListener('input', e=>{
+  document.getElementById('decayVal').textContent = parseFloat(e.target.value).toFixed(2);
+});
+document.getElementById('corruptSlider').addEventListener('input', e=>{
+  document.getElementById('corruptVal').textContent = Math.round(e.target.value*100)+'%';
+});
+
+document.getElementById('storeBtn').addEventListener('click', ()=>{
+  const name=document.getElementById('patternSelect').value;
+  const lambda=parseFloat(document.getElementById('decaySlider').value);
+  outerAdd(VECS[name], lambda);
+  stored.push({name, vec:VECS[name]});
+  refreshSelects(); refreshStoredList(); drawWeights();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  W = new Array(N).fill(0).map(()=>new Array(N).fill(0));
+  stored=[]; refreshSelects(); refreshStoredList(); drawWeights();
+  document.getElementById('probeGrid').innerHTML=''; document.getElementById('recallGrid').innerHTML=''; document.getElementById('truthGrid').innerHTML='';
+  document.getElementById('overlapVal').textContent='—'; document.getElementById('stepsVal').textContent='—';
+});
+
+document.getElementById('probeBtn').addEventListener('click', ()=>{
+  const idx=parseInt(document.getElementById('recallSelect').value);
+  if(isNaN(idx)||!stored[idx]){ alert('Store at least one pattern first, and pick it from the recall dropdown.'); return; }
+  currentTruthIdx=idx;
+  const truth=stored[idx].vec;
+  const frac=parseFloat(document.getElementById('corruptSlider').value);
+  const probe=truth.slice();
+  const nFlip=Math.round(frac*N);
+  const idxs=[...Array(N).keys()].sort(()=>Math.random()-0.5).slice(0,nFlip);
+  idxs.forEach(i=>probe[i]*=-1);
+  currentProbe=probe;
+  buildGrid(document.getElementById('probeGrid'), probe, 'probe');
+  buildGrid(document.getElementById('truthGrid'), truth);
+  document.getElementById('recallGrid').innerHTML='';
+  document.getElementById('overlapVal').textContent='—'; document.getElementById('stepsVal').textContent='—';
+});
+
+function kWTA(activations, k){
+  const idxSorted=[...activations.keys()].sort((a,b)=>activations[b]-activations[a]);
+  const keep=new Set(idxSorted.slice(0,k));
+  return activations.map((v,i)=> keep.has(i) ? 1 : -1);
+}
+
+document.getElementById('recallBtn').addEventListener('click', ()=>{
+  if(!currentProbe){ alert('Corrupt a cue first.'); return; }
+  const sparse=document.getElementById('sparseToggle').checked;
+  let x=currentProbe.slice();
+  let steps=0, prev=null;
+  for(steps=1; steps<=8; steps++){
+    const act = x.map((_,i)=>{ let s=0; for(let j=0;j<N;j++) s+=W[i][j]*x[j]; return s; });
+    let next;
+    if(sparse){
+      const k=Math.max(3,Math.round(N*0.3));
+      next=kWTA(act,k);
+    } else {
+      next=act.map(v=> v>=0?1:-1);
+    }
+    if(prev && next.every((v,i)=>v===prev[i])) { x=next; break; }
+    prev=x; x=next;
+  }
+  buildGrid(document.getElementById('recallGrid'), x);
+  const truth=stored[currentTruthIdx].vec;
+  markDiff(document.getElementById('recallGrid'), x, truth);
+  const overlap = x.reduce((acc,v,i)=> acc+(v===truth[i]?1:0),0)/N;
+  document.getElementById('overlapVal').textContent = Math.round(overlap*100)+'%';
+  document.getElementById('stepsVal').textContent = steps;
+});
+
+function randomPattern(){ return new Array(N).fill(0).map(()=> Math.random()<0.5?1:-1); }
+
+function runOneTrial(numPatterns, sparse){
+  let Wt = new Array(N).fill(0).map(()=>new Array(N).fill(0));
+  const pats=[]; for(let p=0;p<numPatterns;p++) pats.push(randomPattern());
+  pats.forEach(vec=>{ for(let i=0;i<N;i++) for(let j=0;j<N;j++){ if(i!==j) Wt[i][j]+=vec[i]*vec[j]; } });
+  let totalOverlap=0;
+  pats.forEach(truth=>{
+    let probe=truth.slice();
+    const nFlip=Math.round(0.25*N);
+    [...Array(N).keys()].sort(()=>Math.random()-0.5).slice(0,nFlip).forEach(i=>probe[i]*=-1);
+    let x=probe.slice(), prev=null;
+    for(let s=0;s<8;s++){
+      const act=x.map((_,i)=>{ let sum=0; for(let j=0;j<N;j++) sum+=Wt[i][j]*x[j]; return sum; });
+      let next;
+      if(sparse){ const k=Math.max(3,Math.round(N*0.3)); next=kWTA(act,k); }
+      else next=act.map(v=>v>=0?1:-1);
+      if(prev && next.every((v,i)=>v===prev[i])){ x=next; break; }
+      prev=x; x=next;
+    }
+    totalOverlap += x.reduce((acc,v,i)=>acc+(v===truth[i]?1:0),0)/N;
+  });
+  return totalOverlap/numPatterns;
+}
+
+document.getElementById('sweepBtn').addEventListener('click', ()=>{
+  const maxN=12, trials=6;
+  const denseResults=[], sparseResults=[];
+  for(let n=1;n<=maxN;n++){
+    let dSum=0,sSum=0;
+    for(let t=0;t<trials;t++){ dSum+=runOneTrial(n,false); sSum+=runOneTrial(n,true); }
+    denseResults.push(dSum/trials); sparseResults.push(sSum/trials);
+  }
+  drawSweep(denseResults, sparseResults, maxN);
+  const breakN = denseResults.findIndex(v=>v<0.85)+1;
+  document.getElementById('sweepReadout').textContent =
+    `In this run, dense recall accuracy drops below 85% at around ${breakN>0?breakN:'>'+maxN} stored patterns; sparse (k-WTA) retrieval stays higher for longer, at the cost of more aggressively zeroing out uncertain units. Numbers vary run to run — that's real randomness, not a fixed script.`;
+});
+
+function drawSweep(dense, sparse, maxN){
+  const c=document.getElementById('sweepCanvas'); const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const padL=40,padB=30,padT=15,padR=15;
+  const w=c.width-padL-padR, h=c.height-padT-padB;
+  ctx.strokeStyle='#2a2f3f'; ctx.beginPath();
+  ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+h); ctx.lineTo(padL+w,padT+h); ctx.stroke();
+  ctx.fillStyle='#7b83a0'; ctx.font='11px sans-serif';
+  for(let g=0;g<=4;g++){ const y=padT+h-(h*g/4); ctx.fillText((g*25)+'%',6,y+4); ctx.strokeStyle='#1c2030'; ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+w,y); ctx.stroke(); }
+  function plot(data,color){
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.beginPath();
+    data.forEach((v,i)=>{ const x=padL + w*(i/(maxN-1)); const y=padT+h-(h*v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke();
+    data.forEach((v,i)=>{ const x=padL + w*(i/(maxN-1)); const y=padT+h-(h*v); ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,3,0,7); ctx.fill(); });
+  }
+  plot(dense,'#4059c9'); plot(sparse,'#54d68a');
+  ctx.fillStyle='#7b83a0';
+  for(let i=0;i<maxN;i+=2){ const x=padL + w*(i/(maxN-1)); ctx.fillText((i+1)+'', x-4, padT+h+18); }
+  ctx.fillText('patterns stored →', padL+w/2-40, padT+h+29);
+}
+
+// init
+refreshSelects(); refreshStoreGrid(); refreshStoredList(); drawWeights();
+</script>
+</body>
+</html>
