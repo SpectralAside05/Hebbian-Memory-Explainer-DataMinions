@@ -44,7 +44,7 @@ directly in a browser.
 - **Section 3 (capacity sweep):** a real, freshly-computed-on-click Monte
   Carlo simulation (random patterns, 6 trials per point, 1-12 patterns
   stored) plotting recall accuracy in dense vs. sparse (k-winners-take-all)
-  retrieval mode. Nothing here is precomputed — every run gives slightly
+  retrieval mode. Nothing here is precomputed - every run gives slightly
   different numbers because it uses fresh randomness, which is disclosed on
   the page.
 - **BDH module:** grounded in the primary Dragon Hatchling paper and the
@@ -109,7 +109,9 @@ We conceptualized, designed, and coded this interactive explainer entirely from 
 
 ## Credits & licenses
 -Code: 100% original vanilla HTML/JS/CSS. No third-party libraries were used.
+
 -Art: The icons (Plus, X, Box, Arrow, Diamond, T) are our own hand-drawn 7×5 pixel designs.
+
 -Concepts: Cited papers are linked below and are only paraphrased for educational purposes.
 
 ## Limitations (disclosed on the artifact itself too)
