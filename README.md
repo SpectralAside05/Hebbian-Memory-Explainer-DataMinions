@@ -86,19 +86,19 @@ No install needed. Open `hebbian-memory-explainer.html` in any modern browser.
 No server, no dependencies, no API keys, no data files.
 
 ## Primary papers (2022–2026) used or cited
-1. Kosowski, Uznański, Chorowski, Stamirowska, Bartoszkiewicz — *The Dragon
+1. Kosowski, Uznański, Chorowski, Stamirowska, Bartoszkiewicz - *The Dragon
    Hatchling: The Missing Link between the Transformer and Models of the
    Brain*, arXiv:2509.26507 (2025).
-2. Pathway — *BDH-CQ: In-Context Learning with Recurrent Latent Reasoning*,
+2. Pathway - *BDH-CQ: In-Context Learning with Recurrent Latent Reasoning*,
    arXiv:2608.09888 (2026).
-3. Schlag, Irie, Schmidhuber — *Linear Transformers Are Secretly Fast Weight
+3. Schlag, Irie, Schmidhuber - *Linear Transformers Are Secretly Fast Weight
    Programmers*, ICML / arXiv:2102.11174 (2021) — formal basis for treating
    an outer-product update as a Hebbian associative memory write. (Note:
    2021, included as the foundational reference for the mechanism generalized
    by the two 2022+ papers below.)
-4. Irie, Schlag, Csordás, Schmidhuber — *A Modern Self-Referential Weight
+4. Irie, Schlag, Csordás, Schmidhuber - *A Modern Self-Referential Weight
    Matrix That Learns to Modify Itself*, ICML 2022.
-5. Chaudhary — *Enabling Robust In-Context Memory and Rapid Task Adaptation
+5. Chaudhary - *Enabling Robust In-Context Memory and Rapid Task Adaptation
    in Transformers with Hebbian and Gradient-Based Plasticity*,
    arXiv:2510.21908 (2025).
 6. *Hebbian Fast Weights in Vision Transformers for Few-Shot Learning*,
