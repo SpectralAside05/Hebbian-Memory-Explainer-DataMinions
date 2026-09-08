@@ -1,4 +1,4 @@
-# Synaptic Plasticity as Short-Term Memory — an interactive explainer
+# Synaptic Plasticity as Short-Term Memory - an interactive explainer
 ### DataForge 2026 · Pathway Track submission
 
 ## The claim
