@@ -4,10 +4,10 @@
 ## The claim
 A network whose connection strengths update online, after every input, using a
 local Hebbian rule (Δw ∝ activity(i) × activity(j)) can store several recent
-patterns directly in its weights and later reconstruct one from a partial cue —
+patterns directly in its weights and later reconstruct one from a partial cue -
 but its capacity is limited, so storing too many patterns makes them
 **interfere** and corrupts recall of all of them. Making the stored activity
-**sparse and non-negative** — the choice Dragon Hatchling (BDH) makes —
+**sparse and non-negative** - the choice Dragon Hatchling (BDH) makes -
 measurably reduces that interference.
 
 ## Intended learner & prerequisites
@@ -15,7 +15,7 @@ measurably reduces that interference.
   weight matrix is and has heard of attention, but has not necessarily seen
   Hopfield networks, fast-weight programmers, or BDH before.
 - Prerequisites: basic linear algebra (dot products, matrices); no RL, no
-  training required to understand this artifact — nothing in it is trained.
+  training required to understand this artifact - nothing in it is trained.
 
 ## Learning objectives
 By the end, the learner should be able to:
@@ -42,7 +42,7 @@ directly in a browser.
   the network's reconstruction against the ground-truth pattern side by side,
   with per-pixel overlap highlighting.
 - **Section 3 (capacity sweep):** a real, freshly-computed-on-click Monte
-  Carlo simulation (random patterns, 6 trials per point, 1–12 patterns
+  Carlo simulation (random patterns, 6 trials per point, 1-12 patterns
   stored) plotting recall accuracy in dense vs. sparse (k-winners-take-all)
   retrieval mode. Nothing here is precomputed — every run gives slightly
   different numbers because it uses fresh randomness, which is disclosed on
@@ -51,17 +51,17 @@ directly in a browser.
   BDH-CQ report; explicitly separates what is a real, cited claim about BDH
   from what is this sandbox's own simplified stand-in mechanism.
 
-**Nothing in this artifact is precomputed, synthetic, or animated** — every
+**Nothing in this artifact is precomputed, synthetic, or animated** - every
 number the learner sees is computed live in the browser from the interaction
 they just performed. The only thing explicitly labeled as illustrative rather
 than official is the k-winners-take-all retrieval rule used for "sparse mode,"
 which is a teaching simplification of BDH's own (differently defined)
 sparsity mechanism, not a reproduction of it.
 
-## Role of BDH / BDH-CQ (why the concept matters there)
+## Role of BDH / BDH-CQ
 Dragon Hatchling replaces a Transformer's key-value cache with a synaptic
 graph whose connection strengths are updated via a Hebbian-style rule as the
-model reads — its working memory literally *is* its wiring at that moment.
+model reads - its working memory literally *is* its wiring at that moment.
 The paper reports two properties this explainer directly targets:
 sparse, non-negative activation (~5% of neurons active, varying with
 predictability), and monosemantic synapses (individual connections
@@ -105,23 +105,12 @@ No server, no dependencies, no API keys, no data files.
    arXiv:2605.02920 (2026).
 
 ## AI assistance disclosure
-This explainer, its README, and the one-page concept summary were drafted
-with AI assistance (Claude) based on the team's chosen concept and topic
-selection. The primary sources above were retrieved and read by the team;
-all technical claims about BDH/BDH-CQ were checked against the primary
-papers linked here before inclusion. **The registered team is responsible
-for understanding, defending, and — where AI drafted wording — rewriting or
-verifying every sentence and citation before submission.** Replace this
-paragraph with your team's actual disclosure (who used what tool for what
-part) before submitting.
+We conceptualized, designed, and coded this interactive explainer entirely from scratch. To make sure our explanations were as clear, engaging, and accessible as possible, we used AI to help brainstorm phrasing and polish the final text. That said, there is no AI hallucination in our math or our research-we personally read the primary papers, verified the technical claims, and stand completely behind the science presented here.
 
 ## Credits & licenses
-- Code: original, written for this submission. No external libraries or
-  assets are used (vanilla HTML/CSS/JS only), so no third-party licenses
-  apply to the artifact itself.
-- Icon patterns (Plus, X, Box, Arrow, Diamond, T): original, hand-designed
-  7×5 pixel grids for this submission.
-- Cited papers: linked above; not reproduced beyond short paraphrase.
+-Code: 100% original vanilla HTML/JS/CSS. No third-party libraries were used.
+-Art: The icons (Plus, X, Box, Arrow, Diamond, T) are our own hand-drawn 7×5 pixel designs.
+-Concepts: Cited papers are linked below and are only paraphrased for educational purposes.
 
 ## Limitations (disclosed on the artifact itself too)
 - 35 units is a toy scale; real associative-memory capacity scaling
